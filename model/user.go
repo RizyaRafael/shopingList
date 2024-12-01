@@ -1,6 +1,10 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"errors"
+
+	"gorm.io/gorm"
+)
 
 type Users struct {
 	gorm.Model
@@ -11,4 +15,11 @@ type Users struct {
 
 func (Users) TableName() string {
 	return "Users"
+}
+
+func (user Users) BeforeCreate(tx *gorm.DB) (err error) {
+	if user.Password == "" {
+		return errors.New("password is required")
+	}
+	return nil
 }
