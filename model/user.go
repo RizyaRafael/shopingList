@@ -1,7 +1,8 @@
 package model
 
 import (
-	"errors"
+	"log"
+	"shopingList/handler"
 
 	"gorm.io/gorm"
 )
@@ -17,9 +18,9 @@ func (Users) TableName() string {
 	return "Users"
 }
 
-func (user Users) BeforeCreate(tx *gorm.DB) (err error) {
-	if user.Password == "" {
-		return errors.New("password is required")
-	}
-	return nil
+func (user *Users) BeforeCreate(tx *gorm.DB) (err error) {
+	hashedPass, err := handler.HashingPass(user.Password)
+	log.Print(hashedPass)
+	user.Password = hashedPass
+	return 
 }
