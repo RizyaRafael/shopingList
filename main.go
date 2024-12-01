@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"shopingList/controllers"
 	"shopingList/model"
 	"shopingList/routes"
 
@@ -22,6 +23,8 @@ func main() {
 
 	db.AutoMigrate(&model.Users{})
 	db.AutoMigrate(&model.Products{})
+
+	controllers.DB = db
 
 	app := fiber.New()
 	routes.Routes(app)
