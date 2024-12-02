@@ -8,4 +8,5 @@ import (
 
 func UserRouter(app fiber.Router) {
 	app.Post("/register", controllers.Register)
+	app.Post("/login", controllers.Login)
 }
