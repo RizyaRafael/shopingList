@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"shopingList/handler"
 	"shopingList/model"
 	"strings"
@@ -59,7 +58,6 @@ func Login(c *fiber.Ctx) error {
 		errorType = "PASSWORD_REQ"
 		return handler.ErrorHandler(errorType, c)
 	}
-	log.Println(user.Email)
 	result := DB.Raw("select * from \"Users\" where username = ? or email = ?", user.Username, user.Email).Scan(&foundUser)
 
 	if result.RowsAffected == 0 {
@@ -68,10 +66,10 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	checkPass := handler.ComparePass(user.Password, foundUser.Password)
-
 	if checkPass == nil {
+		token := handler.SignToken(foundUser.Username)
 		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
-			"data": "success",
+			"data": "Bearer " + token,
 		})
 	} else {
 		errorType = "INVALID_PASSWORD"
