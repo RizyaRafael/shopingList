@@ -1,23 +1,12 @@
 package controllers
 
 import (
+	"log"
 	"shopingList/handler"
 	"shopingList/model"
 
 	"github.com/gofiber/fiber/v2"
 )
-
-/*
-Admin role
-1. create product
-2. update product
-3. delete product
-
-User role
-1. Create wishlist
-2. Update wishlist
-3. Delete wishlist
-*/
 type Pagination struct {
 	Page  int
 	Limit int
@@ -45,3 +34,13 @@ func GetAllProducts(c *fiber.Ctx) error {
 		"total": totalData,
 	})
 }
+
+func CreateProduct(c *fiber.Ctx) error {
+	userId := c.Locals("userId")
+	log.Print(userId)
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"data": "test",
+	})
+}
+
+

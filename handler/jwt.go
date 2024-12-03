@@ -17,8 +17,19 @@ func SignToken(username string) string {
 	signedToken, err := token.SignedString([]byte(jwtSecret))
 
 	if err != nil {
-		log.Print(err)
 		return "INTERNAL_ERROR"
 	}
 	return signedToken
+}
+
+func VerifyToken(access_token string) string{
+	token, err := jwt.Parse(access_token, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+	if err != nil {
+		return "INTERNAL_ERROR"
+	}
+	claim := token.Claims.(jwt.MapClaims)
+
+	return claim["username"].(string)
 }
