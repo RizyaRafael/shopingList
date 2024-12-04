@@ -1,37 +1,60 @@
 package controllers
 
 import (
+	"log"
 	"shopingList/handler"
 	"shopingList/model"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-type Pagination struct {
-	Page  int
-	Limit int
-}
+
 
 func GetAllProducts(c *fiber.Ctx) error {
-	var pagination Pagination
 	var response []model.Products
 	var totalData int
-	if err := c.BodyParser(&pagination); err != nil {
-		errorType = "INVALID_BODY"
-		return handler.ErrorHandler(errorType, c)
-	}
-	if pagination.Limit == 0 {
-		pagination.Limit = 10
+
+	queries := c.Queries()
+
+	limitStr := queries["limit"]
+	pageStr := queries["page"]
+	name := queries["name"]
+
+	limit := 10
+	page := 1
+	var err error
+	// check limit value
+	if limitStr != "" {
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil {
+			limit = 10
+		}
 	}
 
-	pagination.Page = pagination.Limit * (pagination.Page - 1)
+	// check page value
+	if pageStr != "" {
+		page, err = strconv.Atoi(limitStr)
+		if err != nil {
+			page = 1
+		}
+	}
 
-	DB.Raw("select \"name\", \"id\", \"price\"  from \"Products\" p limit ? offset ?", pagination.Limit, pagination.Page).Scan(&response)
+	// check name value
+	if name == "" {
+		name ="%"
+	} else {
+		name = "%" + name + "%"
+	}
+
+	offset := limit * (page - 1)
+	log.Println(name)
+	DB.Raw("select \"name\", \"id\", \"price\"  from \"Products\" p where name ilike ? limit ? offset ?",name, limit, offset).Scan(&response)
 	DB.Raw("select count(*) as total from \"Products\"").Scan(&totalData)
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"data":  response,
-		"page":  pagination.Page,
+		"page":  page,
 		"total": totalData,
 	})
 }
@@ -88,7 +111,7 @@ func DeleteProduct(c *fiber.Ctx) error {
 	if err := DB.Exec("delete from \"Products\" where id = ?", product.ID); err.Error != nil {
 		return handler.ErrorHandler("internal server error", c)
 	}
-	
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"data": "data succesfully deleted",
 	})
