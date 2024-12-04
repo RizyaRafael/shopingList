@@ -35,7 +35,7 @@ func Register(c *fiber.Ctx) error {
 		}
 		return handler.ErrorHandler(errorType, c)
 	}
-	return c.JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"data": "You've succesfully registered",
 	})
 }
@@ -71,7 +71,7 @@ func Login(c *fiber.Ctx) error {
 		if err != nil {
 			return handler.ErrorHandler("internal server error", c)
 		}
-		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"data": "Bearer " + token,
 		})
 	} else {

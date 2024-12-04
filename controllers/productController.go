@@ -29,7 +29,7 @@ func GetAllProducts(c *fiber.Ctx) error {
 	DB.Raw("select \"name\", \"id\", \"price\"  from \"Products\" p limit ? offset ?", pagination.Limit, pagination.Page).Scan(&response)
 	DB.Raw("select count(*) as total from \"Products\"").Scan(&totalData)
 
-	return c.JSON(fiber.Map{
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"data":  response,
 		"page":  pagination.Page,
 		"total": totalData,
@@ -49,12 +49,13 @@ func CreateProduct(c *fiber.Ctx) error {
 		return handler.ErrorHandler(errorType, c)
 	}
 	newProduct.UserId = userId.(uint)
-	if result := DB.Create(&newProduct); result.Error != nil {
+	result := DB.Create(&newProduct)
+	if result.Error != nil {
 		return handler.ErrorHandler("DATABASE_ERROR", c)
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"data": "Product succesfully created",
+		"data": newProduct,
 	})
 }
 
@@ -63,7 +64,7 @@ func UpdateProduct(c *fiber.Ctx) error {
 	var originalProduct model.Products
 
 	if err := DB.Raw("Select * from \"Products\" where id = ?", updatedProduct.ID).Scan(&originalProduct); err.Error != nil {
-		errorType = "NOT_FOUND"
+		errorType = "internal server error"
 		return handler.ErrorHandler(errorType, c)
 	}
 
@@ -73,5 +74,22 @@ func UpdateProduct(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"data": "Product succesfully updated",
+	})
+}
+
+func DeleteProduct(c *fiber.Ctx) error {
+	var product model.Products
+
+	if err := c.BodyParser(&product); err != nil {
+		errorType = "INVALID_BODY"
+		return handler.ErrorHandler(errorType, c)
+	}
+
+	if err := DB.Exec("delete from \"Products\" where id = ?", product.ID); err.Error != nil {
+		return handler.ErrorHandler("internal server error", c)
+	}
+	
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"data": "data succesfully deleted",
 	})
 }

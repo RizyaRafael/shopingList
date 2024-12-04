@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log"
 	"shopingList/handler"
 	"shopingList/model"
 
@@ -19,15 +18,16 @@ func Authentication(c *fiber.Ctx) error {
 		return handler.ErrorHandler(errorType, c)
 	}
 
-	// get the original product to compare
-	if err := DB.Raw("select * from \"Products\" where id = ?", updatedProduct.ID).Scan(&originalProduct); err.Error != nil {
-		
+	// get the original product to compare and check if data exist or not
+	result := DB.Raw("select * from \"Products\" where id = ?", updatedProduct.ID).Scan(&originalProduct)
+	if result.Error != nil {
 		return handler.ErrorHandler("internal server error", c)
+	} else if result.RowsAffected == 0{
+		return handler.ErrorHandler("NOT_FOUND", c)
 	}
 
 	//compare original product userId with the login user id
 	if originalProduct.UserId != userId{
-		log.Print("caught in the compare userId")
 		return handler.ErrorHandler("UNAUTHORIZED", c)
 	}
 	return c.Next()

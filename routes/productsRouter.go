@@ -9,6 +9,13 @@ import (
 
 func ProductsRouter(app fiber.Router) {
 	app.Get("/", controllers.GetAllProducts)
-	app.Post("/create", middleware.Authorization, controllers.CreateProduct)
-	app.Put("/update", middleware.Authorization, middleware.Authentication, controllers.UpdateProduct)
+
+	//user needs to login to access
+	app.Use(middleware.Authorization)
+	app.Post("/create", controllers.CreateProduct)
+
+	//Only user that created the product could access
+	app.Use(middleware.Authentication)
+	app.Put("/update", controllers.UpdateProduct)
+	app.Delete("/delete", controllers.DeleteProduct)
 }
