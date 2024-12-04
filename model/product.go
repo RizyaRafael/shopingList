@@ -6,6 +6,7 @@ type Products struct {
 	Price    uint64
 	Quantity uint64
 	UserId   uint
+	ImageUrl string
 }
 
 func (Products) TableName() string {

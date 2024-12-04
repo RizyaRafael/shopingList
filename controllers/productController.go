@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"log"
 	"shopingList/handler"
 	"shopingList/model"
 
 	"github.com/gofiber/fiber/v2"
 )
+
 type Pagination struct {
 	Page  int
 	Limit int
@@ -31,16 +31,29 @@ func GetAllProducts(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"data":  response,
+		"page": pagination.Page,
 		"total": totalData,
 	})
 }
 
 func CreateProduct(c *fiber.Ctx) error {
+	var newProduct model.Products
 	userId := c.Locals("userId")
-	log.Print(userId)
-	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
-		"data": "test",
+
+	if err := c.BodyParser(&newProduct); err != nil {
+		errorType = "INVALID_BODY"
+		return handler.ErrorHandler(errorType, c)
+	}
+	if newProduct.Name == "" || newProduct.Price == 0 || newProduct.Quantity == 0 || newProduct.ImageUrl == ""{
+		errorType = "ALL_FORM_REQUIRED"
+		return handler.ErrorHandler(errorType, c)
+	}
+	newProduct.UserId = userId.(uint)
+	if result := DB.Create(&newProduct); result.Error != nil {
+        return handler.ErrorHandler("DATABASE_ERROR", c)
+    }
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"data": "Product succesfully created",
 	})
 }
-
-
