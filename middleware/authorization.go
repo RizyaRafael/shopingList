@@ -22,9 +22,9 @@ func Authorization(c *fiber.Ctx) error {
 		return handler.ErrorHandler("UNAUTHORIZED", c)
 	}
 
-	verifyToken := handler.VerifyToken(checkBearer[1])
-	if verifyToken == "INTERNAL_ERROR" {
-		return handler.ErrorHandler(verifyToken, c)
+	verifyToken, err := handler.VerifyToken(checkBearer[1], c)
+	if err != nil {
+		return handler.ErrorHandler("internal server error", c)
 	}
 	checkUsername := DB.Raw("select * from \"Users\" where \"username\" = ?", verifyToken).Scan(&user)
 	if checkUsername.RowsAffected == 0 {

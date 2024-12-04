@@ -67,7 +67,10 @@ func Login(c *fiber.Ctx) error {
 
 	checkPass := handler.ComparePass(user.Password, foundUser.Password)
 	if checkPass == nil {
-		token := handler.SignToken(foundUser.Username)
+		token, err := handler.SignToken(foundUser.Username, c)
+		if err != nil {
+			return handler.ErrorHandler("internal server error", c)
+		}
 		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
 			"data": "Bearer " + token,
 		})
