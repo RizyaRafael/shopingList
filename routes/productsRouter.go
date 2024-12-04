@@ -10,4 +10,5 @@ import (
 func ProductsRouter(app fiber.Router) {
 	app.Get("/", controllers.GetAllProducts)
 	app.Post("/create", middleware.Authorization, controllers.CreateProduct)
+	app.Put("/update", middleware.Authorization, middleware.Authentication, controllers.UpdateProduct)
 }

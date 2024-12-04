@@ -31,7 +31,7 @@ func GetAllProducts(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"data":  response,
-		"page": pagination.Page,
+		"page":  pagination.Page,
 		"total": totalData,
 	})
 }
@@ -44,16 +44,34 @@ func CreateProduct(c *fiber.Ctx) error {
 		errorType = "INVALID_BODY"
 		return handler.ErrorHandler(errorType, c)
 	}
-	if newProduct.Name == "" || newProduct.Price == 0 || newProduct.Quantity == 0 || newProduct.ImageUrl == ""{
+	if newProduct.Name == "" || newProduct.Price == 0 || newProduct.Quantity == 0 || newProduct.ImageUrl == "" {
 		errorType = "ALL_FORM_REQUIRED"
 		return handler.ErrorHandler(errorType, c)
 	}
 	newProduct.UserId = userId.(uint)
 	if result := DB.Create(&newProduct); result.Error != nil {
-        return handler.ErrorHandler("DATABASE_ERROR", c)
-    }
+		return handler.ErrorHandler("DATABASE_ERROR", c)
+	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"data": "Product succesfully created",
+	})
+}
+
+func UpdateProduct(c *fiber.Ctx) error {
+	var updatedProduct model.Products
+	var originalProduct model.Products
+
+	if err := DB.Raw("Select * from \"Products\" where id = ?", updatedProduct.ID).Scan(&originalProduct); err.Error != nil {
+		errorType = "NOT_FOUND"
+		return handler.ErrorHandler(errorType, c)
+	}
+
+	if err := DB.Exec("update \"Products\" set \"name\" = ?, \"price\" = ?, \"quantity\" = ?, \"image_url\" = ? where id = ?", updatedProduct.Name, updatedProduct.Price, updatedProduct.Quantity, updatedProduct.ImageUrl, updatedProduct.ID); err.Error != nil {
+		return handler.ErrorHandler("Internal server error", c)
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"data": "Product succesfully updated",
 	})
 }
