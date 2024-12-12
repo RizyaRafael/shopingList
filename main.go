@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"shopingList/controllers"
 	"shopingList/middleware"
 	"shopingList/model"
@@ -9,13 +10,22 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
+	if os.Getenv("NODE_ENV") != "production" {
+		if err := godotenv.Load(); err != nil {
+			log.Fatal("Error loading .env file")
+		}
+	}
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
 
 	dsn := "host=localhost user=postgres password=postgres dbname=shoping_list port=5432 sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -23,7 +33,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	if err = godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
