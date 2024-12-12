@@ -13,6 +13,7 @@ const(
 	InvalidPasswordError = "INVALID_PASSWORD"
 	UnauthorizedError = "UNAUTHORIZED"
 	InvalidIdError = "INVALID_ID"
+	InvalidQuantityError = "INVALID_QUANTITY"
 )
 
 func ErrorHandler(err string, c *fiber.Ctx) error {
@@ -46,6 +47,9 @@ var errorMessage string
 	case InvalidIdError:
 		statusCode = fiber.StatusBadRequest
 		errorMessage = "invalid request id"
+	case InvalidQuantityError:
+		statusCode = fiber.StatusBadRequest
+		errorMessage = "invalid quantity"
 	default:
 		statusCode = fiber.StatusInternalServerError
 		errorMessage = "an error occured"

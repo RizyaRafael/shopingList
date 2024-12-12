@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func main() {
@@ -34,6 +35,7 @@ func main() {
 	middleware.DB = db
 
 	app := fiber.New()
+	app.Use(cors.New())
 	routes.Routes(app)
 
 	app.Listen(":3000")

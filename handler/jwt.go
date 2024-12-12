@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,7 +9,6 @@ import (
 
 func SignToken(username string, c *fiber.Ctx) (string, error) {
 	jwtSecret := os.Getenv("JWT_SECRET")
-	log.Println(jwtSecret)
 	claims := jwt.MapClaims{
 		"username": username,
 	}

@@ -73,6 +73,8 @@ func Login(c *fiber.Ctx) error {
 		}
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"data": "Bearer " + token,
+			"userId": foundUser.ID,
+
 		})
 	} else {
 		errorType = "INVALID_PASSWORD"
