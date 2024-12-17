@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"shopingList/controllers"
@@ -22,12 +23,12 @@ func main() {
 			log.Fatal("Error loading .env file")
 		}
 	}
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3000"
-	}
+	DB_HOST := os.Getenv("DB_HOST")
+	DB_USER := os.Getenv("DB_USER")
+	DB_PASS := os.Getenv("DB_PASS")
+	DB_NAME := os.Getenv("DB_NAME")
 
-	dsn := "host=localhost user=postgres password=postgres dbname=shoping_list port=5432 sslmode=disable"
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=5432 sslmode=require", DB_HOST, DB_USER, DB_PASS, DB_NAME)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
