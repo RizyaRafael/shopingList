@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.swal2-popup {
+    z-index: 1050 !important /* Ensure it's above Bootstrap modal */
+}
+
+.swal2-overlay {
+    z-index: 1040 !important /* Ensure overlay is behind popup */
+}
