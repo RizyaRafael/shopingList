@@ -1,31 +1,23 @@
-package handler
+package main
 
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
-	"shopingList/api/controllers"
-	"shopingList/api/middleware"
-	"shopingList/api/model"
-	"shopingList/api/routes"
+	"shopingList/controllers"
+	"shopingList/middleware"
+	"shopingList/model"
+	"shopingList/routes"
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
-func Handler(w http.ResponseWriter, r *http.Request) {
-	// This is needed to set the proper request path in `*fiber.Ctx`
-	r.RequestURI = r.URL.String()
-   
-	handler().ServeHTTP(w, r)
-   }
 
-func handler() http.HandlerFunc {
+func main() {
 	if os.Getenv("NODE_ENV") != "production" {
 		log.Print("nodeenv production")
 		if err := godotenv.Load(); err != nil {
@@ -55,6 +47,6 @@ func handler() http.HandlerFunc {
 	app.Use(cors.New())
 	routes.Routes(app)
 
-	
-	return adaptor.FiberApp(app)
+	app.Listen(":3000")
 }
+

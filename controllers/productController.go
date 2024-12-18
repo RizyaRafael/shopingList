@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"shopingList/api/helpers"
-	"shopingList/api/model"
+	"shopingList/handler"
+	"shopingList/model"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -60,7 +60,7 @@ func GetOneProduct(c *fiber.Ctx) error {
 
 	result := DB.Raw("select * from \"Products\" where id = ?", productId).Scan(&data)
 	if result.Error != nil {
-		return helpers.ErrorHandler("NOT_FOUND", c)
+		return handler.ErrorHandler("NOT_FOUND", c)
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"data": data,
@@ -73,16 +73,16 @@ func CreateProduct(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&newProduct); err != nil {
 		errorType = "INVALID_BODY"
-		return helpers.ErrorHandler(errorType, c)
+		return handler.ErrorHandler(errorType, c)
 	}
 	if newProduct.Name == "" || newProduct.Price == 0 || newProduct.Quantity == 0 || newProduct.ImageUrl == "" {
 		errorType = "ALL_FORM_REQUIRED"
-		return helpers.ErrorHandler(errorType, c)
+		return handler.ErrorHandler(errorType, c)
 	}
 	newProduct.UserId = userId.(uint)
 	result := DB.Exec("insert into \"Products\" (name, quantity, price, image_url, user_id) values (?, ?, ?, ?, ?)", newProduct.Name, newProduct.Quantity, newProduct.Price, newProduct.ImageUrl, userId)
 	if result.Error != nil {
-		return helpers.ErrorHandler("DATABASE_ERROR", c)
+		return handler.ErrorHandler("DATABASE_ERROR", c)
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
@@ -97,20 +97,20 @@ func UpdateProduct(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&updatedProduct); err != nil {
 		errorType = "INVALID_BODY"
-		return helpers.ErrorHandler(errorType, c)
+		return handler.ErrorHandler(errorType, c)
 	}
 
 	if err := DB.Raw("Select * from \"Products\" where id = ?", productId).Scan(&originalProduct); err.Error != nil {
 		errorType = "internal server error"
-		return helpers.ErrorHandler(errorType, c)
+		return handler.ErrorHandler(errorType, c)
 	}
 
 	response := DB.Exec("update \"Products\" set \"name\" = ?, \"price\" = ?, \"quantity\" = ?, \"image_url\" = ? where id = ?", updatedProduct.Name, updatedProduct.Price, updatedProduct.Quantity, updatedProduct.ImageUrl, productId)
 	if response.Error != nil {
-		return helpers.ErrorHandler("Internal server error", c)
+		return handler.ErrorHandler("Internal server error", c)
 	}
 	if response.RowsAffected == 0 {
-		return helpers.ErrorHandler("UPDATE_FAILED", c)
+		return handler.ErrorHandler("UPDATE_FAILED", c)
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
@@ -121,7 +121,7 @@ func UpdateProduct(c *fiber.Ctx) error {
 func DeleteProduct(c *fiber.Ctx) error {
 	productId := c.Params("id")
 	if err := DB.Exec("delete from \"Products\" where id = ?", productId); err.Error != nil {
-		return helpers.ErrorHandler("internal server error", c)
+		return handler.ErrorHandler("internal server error", c)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -134,20 +134,20 @@ func BuyProduct(c *fiber.Ctx) error {
 	var checkProduct model.Products
 	if err := c.BodyParser(&bodyProduct); err != nil {
 		errorType = "INVALID_BODY"
-		return helpers.ErrorHandler(errorType, c)
+		return handler.ErrorHandler(errorType, c)
 	}
 	result := DB.Raw("select * from \"Products\" where id = ?", bodyProduct.ID).Scan(&checkProduct)
 	if result.Error != nil {
-		return helpers.ErrorHandler("internal server error", c)
+		return handler.ErrorHandler("internal server error", c)
 	} else if result.RowsAffected == 0 {
-		return helpers.ErrorHandler("NOT_FOUND", c)
+		return handler.ErrorHandler("NOT_FOUND", c)
 	}
 	if bodyProduct.Quantity < 1 {
-		return helpers.ErrorHandler("INVALID_QUANTITY", c)
+		return handler.ErrorHandler("INVALID_QUANTITY", c)
 	}
 	update := DB.Exec("update \"Products\" set quantity = ? where id = ?", bodyProduct.Quantity-1, bodyProduct.ID)
 	if update.RowsAffected == 0 {
-		return helpers.ErrorHandler("internal server error", c)
+		return handler.ErrorHandler("internal server error", c)
 	} else {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
 			"data": "Successfully bought item",
@@ -160,7 +160,7 @@ func GetUserProducts(c *fiber.Ctx) error {
 	userId := c.Locals("userId")
 	result := DB.Raw("select * from \"Products\" where user_id = ? order by id asc", userId).Scan(&userProduct)
 	if result.Error != nil {
-		return helpers.ErrorHandler("internal server error", c)
+		return handler.ErrorHandler("internal server error", c)
 	}
 
 	if len(userProduct) == 0 {

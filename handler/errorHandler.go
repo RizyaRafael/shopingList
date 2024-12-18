@@ -1,24 +1,25 @@
-package helpers
+package handler
 
 import (
 	"github.com/gofiber/fiber/v2"
 )
-const(
-	FormRequiredError = "ALL_FORM_REQUIRED"
-	InvalidBodyError = "INVALID_BODY"
-	EmailOrUsernameError = "USERNAME_EMAIL_EXIST"
-	EmptyEmailOrUsername ="EMAIL_OR_USERNAME_REQ"
+
+const (
+	FormRequiredError     = "ALL_FORM_REQUIRED"
+	InvalidBodyError      = "INVALID_BODY"
+	EmailOrUsernameError  = "USERNAME_EMAIL_EXIST"
+	EmptyEmailOrUsername  = "EMAIL_OR_USERNAME_REQ"
 	PasswordRequiredError = "PASSWORD_REQ"
-	DataNotFound = "NOT_FOUND"
-	InvalidPasswordError = "INVALID_PASSWORD"
-	UnauthorizedError = "UNAUTHORIZED"
-	InvalidIdError = "INVALID_ID"
-	InvalidQuantityError = "INVALID_QUANTITY"
+	DataNotFound          = "NOT_FOUND"
+	InvalidPasswordError  = "INVALID_PASSWORD"
+	UnauthorizedError     = "UNAUTHORIZED"
+	InvalidIdError        = "INVALID_ID"
+	InvalidQuantityError  = "INVALID_QUANTITY"
 )
 
 func ErrorHandler(err string, c *fiber.Ctx) error {
-var statusCode int
-var errorMessage string
+	var statusCode int
+	var errorMessage string
 	switch err {
 	case FormRequiredError:
 		statusCode = fiber.StatusBadRequest
@@ -42,7 +43,7 @@ var errorMessage string
 		statusCode = fiber.StatusUnauthorized
 		errorMessage = "invalid password or username"
 	case UnauthorizedError:
-		statusCode= fiber.StatusUnauthorized
+		statusCode = fiber.StatusUnauthorized
 		errorMessage = "Unauthorized action"
 	case InvalidIdError:
 		statusCode = fiber.StatusBadRequest

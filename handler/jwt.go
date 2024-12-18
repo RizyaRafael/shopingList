@@ -1,4 +1,4 @@
-package helpers
+package handler
 
 import (
 	"os"
@@ -21,7 +21,7 @@ func SignToken(username string, c *fiber.Ctx) (string, error) {
 	return signedToken, nil
 }
 
-func VerifyToken(access_token string, c *fiber.Ctx) (string, error){
+func VerifyToken(access_token string, c *fiber.Ctx) (string, error) {
 	token, err := jwt.Parse(access_token, func(token *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
