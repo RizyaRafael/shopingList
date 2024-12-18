@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"shopingList/handler"
-	"shopingList/model"
+	"shopingList/api/helpers"
+	"shopingList/api/model"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -18,13 +18,13 @@ func Register(c *fiber.Ctx) error {
 	//check if client send the form data
 	if err := c.BodyParser(&user); err != nil {
 		errorType = "INVALID_BODY"
-		return handler.ErrorHandler(errorType, c)
+		return helpers.ErrorHandler(errorType, c)
 	}
 
 	//check if the form is filled or not
 	if user.Password == "" || user.Email == "" || user.Username == "" {
 		errorType = "ALL_FORM_REQUIRED"
-		return handler.ErrorHandler(errorType, c)
+		return helpers.ErrorHandler(errorType, c)
 	}
 
 	//create the new user and send error if meet any validation constraint
@@ -33,7 +33,7 @@ func Register(c *fiber.Ctx) error {
 		if strings.Contains(result.Error.Error(), "23505") {
 			errorType = "USERNAME_EMAIL_EXIST"
 		}
-		return handler.ErrorHandler(errorType, c)
+		return helpers.ErrorHandler(errorType, c)
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"data": "You've succesfully registered",
@@ -47,37 +47,36 @@ func Login(c *fiber.Ctx) error {
 	//check if client send the form data
 	if err := c.BodyParser(&user); err != nil {
 		errorType = "INVALID_BODY"
-		return handler.ErrorHandler(errorType, c)
+		return helpers.ErrorHandler(errorType, c)
 	}
 
 	//check if the form is filled or not
 	if user.Email == "" && user.Username == "" {
 		errorType = "EMAIL_OR_USERNAME_REQ"
-		return handler.ErrorHandler(errorType, c)
+		return helpers.ErrorHandler(errorType, c)
 	} else if user.Password == "" {
 		errorType = "PASSWORD_REQ"
-		return handler.ErrorHandler(errorType, c)
+		return helpers.ErrorHandler(errorType, c)
 	}
 	result := DB.Raw("select * from \"Users\" where username = ? or email = ?", user.Username, user.Email).Scan(&foundUser)
 
 	if result.RowsAffected == 0 {
 		errorType = "NOT_FOUND"
-		return handler.ErrorHandler(errorType, c)
+		return helpers.ErrorHandler(errorType, c)
 	}
 
-	checkPass := handler.ComparePass(user.Password, foundUser.Password)
+	checkPass := helpers.ComparePass(user.Password, foundUser.Password)
 	if checkPass == nil {
-		token, err := handler.SignToken(foundUser.Username, c)
+		token, err := helpers.SignToken(foundUser.Username, c)
 		if err != nil {
-			return handler.ErrorHandler("internal server error", c)
+			return helpers.ErrorHandler("internal server error", c)
 		}
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"data": "Bearer " + token,
+			"data":   "Bearer " + token,
 			"userId": foundUser.ID,
-
 		})
 	} else {
 		errorType = "INVALID_PASSWORD"
-		return handler.ErrorHandler(errorType, c)
+		return helpers.ErrorHandler(errorType, c)
 	}
 }

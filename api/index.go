@@ -1,24 +1,33 @@
-package main
+package handler
 
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
-	"shopingList/controllers"
-	"shopingList/middleware"
-	"shopingList/model"
-	"shopingList/routes"
+	"shopingList/api/controllers"
+	"shopingList/api/middleware"
+	"shopingList/api/model"
+	"shopingList/api/routes"
 
 	"github.com/gofiber/fiber/v2"
 
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+func Handler(w http.ResponseWriter, r *http.Request) {
+	// This is needed to set the proper request path in `*fiber.Ctx`
+	r.RequestURI = r.URL.String()
+   
+	handler().ServeHTTP(w, r)
+   }
 
-func main() {
+func handler() http.HandlerFunc {
 	if os.Getenv("NODE_ENV") != "production" {
+		log.Print("nodeenv production")
 		if err := godotenv.Load(); err != nil {
 			log.Fatal("Error loading .env file")
 		}
@@ -28,18 +37,12 @@ func main() {
 	DB_PASS := os.Getenv("DB_PASS")
 	DB_NAME := os.Getenv("DB_NAME")
 	DB_PORT := os.Getenv("DB_PORT")
-	
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=require", DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	log.Print(db)
 
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err = godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("error at db connection", err)
 	}
 
 	db.AutoMigrate(&model.Users{})
@@ -52,5 +55,6 @@ func main() {
 	app.Use(cors.New())
 	routes.Routes(app)
 
-	app.Listen(":3000")
+	
+	return adaptor.FiberApp(app)
 }

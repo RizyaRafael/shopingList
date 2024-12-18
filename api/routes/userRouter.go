@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"shopingList/controllers"
+	"shopingList/api/controllers"
 
 	"github.com/gofiber/fiber/v2"
 )

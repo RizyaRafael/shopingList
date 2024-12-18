@@ -1,7 +1,7 @@
 package model
 
 import (
-	"shopingList/handler"
+	"shopingList/api/helpers"
 
 	"gorm.io/gorm"
 )
@@ -19,7 +19,7 @@ func (Users) TableName() string {
 }
 
 func (user *Users) BeforeCreate(tx *gorm.DB) (err error) {
-	hashedPass, err := handler.HashingPass(user.Password)
+	hashedPass, err := helpers.HashingPass(user.Password)
 	user.Password = hashedPass
 	return
 }
